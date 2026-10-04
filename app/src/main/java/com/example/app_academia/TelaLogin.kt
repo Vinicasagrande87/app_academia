@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 
 @Composable
 fun TelaLogin(aoEntrar: (String) -> Unit) {
@@ -23,6 +25,23 @@ fun TelaLogin(aoEntrar: (String) -> Unit) {
 
     // Fica true quando a pessoa tenta entrar com dados que não estão na lista
     var loginRecusado by rememberSaveable { mutableStateOf(false) }
+
+    // Fica true enquanto o login está sendo conferido
+    var carregando by rememberSaveable { mutableStateOf(false) }
+
+    // Quando carregando vira true, espera um pouco (como se fosse um servidor)
+    // e só depois confere no "banco" (user.kt)
+    LaunchedEffect(carregando) {
+        if (carregando) {
+            delay(1500)
+            carregando = false
+            if (loginValido(email, senha)) {
+                aoEntrar(email)          // achou: vai para a próxima tela
+            } else {
+                loginRecusado = true     // não achou: mostra o aviso
+            }
+        }
+    }
 
     // ===== 1. AS REGRAS (calculadas a cada letra digitada) =====
     val emailValido = Patterns.EMAIL_ADDRESS.matcher(email).matches()
@@ -58,6 +77,7 @@ fun TelaLogin(aoEntrar: (String) -> Unit) {
             },
             label = { Text("E-mail") },
             singleLine = true,
+            enabled = !carregando,          // trava o campo enquanto carrega
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             // ===== 2. O CAMPO SE PINTA DE VERMELHO SOZINHO =====
             isError = erroEmail || loginRecusado,
@@ -77,6 +97,7 @@ fun TelaLogin(aoEntrar: (String) -> Unit) {
             },
             label = { Text("Senha") },
             singleLine = true,
+            enabled = !carregando,          // trava o campo enquanto carrega
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             isError = erroSenha || loginRecusado,
@@ -92,20 +113,29 @@ fun TelaLogin(aoEntrar: (String) -> Unit) {
         )
 
         // ===== 3. O BOTÃO SÓ LIGA QUANDO OS DOIS ESTÃO VÁLIDOS =====
+        // (e desliga enquanto carrega, para não clicar duas vezes)
         Button(
-            onClick = {
-                // Confere no "banco" (Usuarios.kt)
-                if (loginValido(email, senha)) {
-                    aoEntrar(email)          // achou: vai para a próxima tela
-                } else {
-                    loginRecusado = true     // não achou: mostra o aviso
-                }
-            },
-            enabled = emailValido && senhaValida,
+            onClick = { carregando = true },
+            enabled = emailValido && senhaValida && !carregando,
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("ENTRAR")
+            if (carregando) {
+                // Estado de carregando: rodinha girando + texto
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Espaco.pequeno)
+                ) {
+                    CircularProgressIndicator(
+                        color = LocalContentColor.current,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(Espaco.medio)
+                    )
+                    Text("ENTRANDO…")
+                }
+            } else {
+                Text("ENTRAR")
+            }
         }
     }
 }
