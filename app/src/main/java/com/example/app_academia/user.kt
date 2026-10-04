@@ -9,7 +9,8 @@ data class Usuario(val email: String, val senha: String)
 // Para cadastrar mais alguém, é só adicionar outra linha na lista.
 val usuarios = listOf(
     Usuario(email = "academiaulbra@ulbra.br", senha = "admin123"),
-    Usuario(email = "academiaubra@ulbra.br", senha = "admin123")
+    Usuario(email = "academiaubra@ulbra.br", senha = "admin123"),
+    Usuario(email = "vinicius@ulbra.br", senha = "123456")
 )
 
 // Confere se o e-mail e a senha batem com alguém da lista.

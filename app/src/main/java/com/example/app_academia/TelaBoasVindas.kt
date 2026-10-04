@@ -9,49 +9,53 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 
-// Segunda tela: RECEBE o e-mail da tela de login
-@OptIn(ExperimentalMaterial3Api::class)
+// Segunda tela: RECEBE o e-mail da tela de login.
+// As barras de cima e de baixo vêm do Scaffold do navegation.kt
 @Composable
 fun TelaBoasVindas(email: String, aoSair: () -> Unit) {
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Início") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        }
-    ) { innerPadding ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(Espaco.medio),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Espaco.grande)
+    ) {
+        Text("Bem-vindo(a)!", style = MaterialTheme.typography.headlineMedium)
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(Espaco.medio),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Espaco.grande)
+        // O dado que veio da outra tela aparece num Card (cores do tema)
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Bem-vindo(a)!", style = MaterialTheme.typography.headlineMedium)
-
-            // O dado que veio da outra tela aparece aqui
-            Text(
-                text = "Você entrou como:\n$email",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
-            )
-
-            // Botão que VOLTA para o login
-            Button(
-                onClick = aoSair,
-                shape = MaterialTheme.shapes.small,
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Espaco.medio),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Espaco.pequeno)
             ) {
-                Text("SAIR")
+                Text("Você entrou como", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    text = email,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    textAlign = TextAlign.Center
+                )
             }
+        }
+
+        // Botão que VOLTA para o login
+        Button(
+            onClick = aoSair,
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("SAIR")
         }
     }
 }
