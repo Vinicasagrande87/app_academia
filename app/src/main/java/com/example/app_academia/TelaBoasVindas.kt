@@ -14,9 +14,15 @@ import androidx.compose.ui.text.style.TextAlign
 // RECEBE o e-mail da tela de login (ele veio pela rota "boasvindas/{email}").
 // Também recebe a função aoSair: a tela só AVISA que a pessoa quer sair,
 // quem decide para onde ir é o navegation.kt.
+// O check-in (localização) vem do navegation.kt, pelo mesmo caminho.
 // As barras de cima e de baixo vêm do Scaffold do navegation.kt
 @Composable
-fun TelaBoasVindas(email: String, aoSair: () -> Unit) {
+fun TelaBoasVindas(
+    email: String,
+    checkIn: CheckIn?,
+    aoFazerCheckIn: (CheckIn) -> Unit,
+    aoSair: () -> Unit
+) {
 
     // Column empilha os itens um embaixo do outro
     Column(
@@ -60,6 +66,9 @@ fun TelaBoasVindas(email: String, aoSair: () -> Unit) {
                 )
             }
         }
+
+        // ----- CHECK-IN DO TREINO (opcional, RecursosDoAparelho.kt) -----
+        CheckInDoTreino(checkIn = checkIn, aoFazerCheckIn = aoFazerCheckIn)
 
         // ----- BOTÃO SAIR -----
         // Ao tocar, chama aoSair: o navegation.kt VOLTA para o login

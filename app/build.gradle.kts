@@ -38,6 +38,7 @@ android {
 dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.0")
     implementation("androidx.compose.material:material-icons-core:1.7.8") // ícones da barra de baixo
+    implementation("com.google.android.gms:play-services-location:21.3.0") // localização (check-in)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

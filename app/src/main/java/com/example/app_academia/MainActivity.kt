@@ -17,6 +17,7 @@ import androidx.activity.enableEdgeToEdge      // desenha até as bordas da tela
 //   TelaBoasVindas.kt -> segunda tela, que recebe o e-mail
 //   TelaPerfil.kt     -> perfil, também recebe o e-mail
 //   TelaSobre.kt      -> versão e créditos
+//   RecursosDoAparelho.kt -> câmera (foto de perfil) e localização (check-in)
 //   user.kt           -> a lista de usuários e a regra do login (sem tela)
 class MainActivity : ComponentActivity() {
 

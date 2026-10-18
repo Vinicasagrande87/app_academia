@@ -1,6 +1,7 @@
 package com.example.app_academia
 
 // ===== IMPORTS =====
+import android.graphics.Bitmap
 import android.net.Uri                                  // Uri.encode protege o e-mail na rota
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
@@ -39,6 +40,12 @@ fun Navegacao() {
     // E-mail de quem entrou: a barra de baixo precisa dele para montar as rotas
     // rememberSaveable: continua guardado se girar a tela
     var emailLogado by rememberSaveable { mutableStateOf("") }
+
+    // Foto de perfil e check-in (RecursosDoAparelho.kt).
+    // Moram AQUI, e não nas telas, para não sumirem ao trocar de aba
+    // e para o check-in do Início aparecer também no Perfil.
+    var fotoPerfil by rememberSaveable { mutableStateOf<Bitmap?>(null) }
+    var checkIn by rememberSaveable { mutableStateOf<CheckIn?>(null) }
 
     // Qual prato está no topo da pilha agora.
     // currentBackStackEntryAsState: a tela se redesenha sozinha quando a rota muda
@@ -132,6 +139,8 @@ fun Navegacao() {
                 val email = backStackEntry.arguments?.getString("email") ?: ""
                 TelaBoasVindas(
                     email = email,
+                    checkIn = checkIn,
+                    aoFazerCheckIn = { checkIn = it },
                     // VOLTA: desempilha tudo até o login
                     // (inclusive = false: o login fica na pilha)
                     aoSair = { navController.popBackStack("login", inclusive = false) }
@@ -141,7 +150,12 @@ fun Navegacao() {
             // ----- PERFIL (também recebe o e-mail pela rota) -----
             composable("perfil/{email}") { backStackEntry ->
                 val email = backStackEntry.arguments?.getString("email") ?: ""
-                TelaPerfil(email = email)
+                TelaPerfil(
+                    email = email,
+                    foto = fotoPerfil,
+                    checkIn = checkIn,
+                    aoTirarFoto = { fotoPerfil = it }
+                )
             }
 
             // ----- SOBRE -----

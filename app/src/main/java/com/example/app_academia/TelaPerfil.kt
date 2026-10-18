@@ -4,15 +4,17 @@ package com.example.app_academia
 import androidx.compose.foundation.layout.*           // Column, padding, fillMaxSize...
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import android.graphics.Bitmap
 import androidx.compose.material3.*                   // Text, Card...
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 // ===== TELA DE PERFIL =====
 // Recebe o e-mail pela rota "perfil/{email}", igual à tela de boas-vindas.
-// Ela só MOSTRA dados: não navega para lugar nenhum, então não recebe função.
+// Não navega para lugar nenhum. A foto e o check-in vêm do navegation.kt;
+// a tela só AVISA quando a pessoa tira uma foto nova.
 @Composable
-fun TelaPerfil(email: String) {
+fun TelaPerfil(email: String, foto: Bitmap?, checkIn: CheckIn?, aoTirarFoto: (Bitmap) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()                          // ocupa a tela inteira
@@ -22,10 +24,17 @@ fun TelaPerfil(email: String) {
     ) {
         Text("Meu perfil", style = MaterialTheme.typography.headlineMedium)
 
+        // Foto para o instrutor reconhecer o aluno (opcional, RecursosDoAparelho.kt)
+        FotoDePerfil(foto = foto, aoTirarFoto = aoTirarFoto)
+
         // Um cartão para cada informação.
         // O mesmo componente (ItemPerfil) é reaproveitado: muda só o texto.
         ItemPerfil(titulo = "E-mail", valor = email)
         ItemPerfil(titulo = "Unidade", valor = "Academia Ulbra")
+        // O check-in feito no Início aparece aqui também (só se foi feito)
+        if (checkIn != null) {
+            ItemPerfil(titulo = "Último check-in", valor = "Perto de ${descreverLocal(checkIn)}")
+        }
     }
 }
 
