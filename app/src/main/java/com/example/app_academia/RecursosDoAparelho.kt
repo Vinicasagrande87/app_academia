@@ -3,14 +3,18 @@ package com.example.app_academia
 // ===== IMPORTS =====
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.location.Address
 import android.location.Geocoder
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 // Launcher: abre outra "janela" (pedido de permissão, app de câmera) e recebe a resposta
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +30,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+// ActivityCompat: diz se o Android ainda mostraria o pedido de permissão
+import androidx.core.app.ActivityCompat
 // ContextCompat: confere se a permissão já foi dada
 import androidx.core.content.ContextCompat
 // Cliente de localização do Google Play Services
@@ -127,12 +133,26 @@ fun CheckInDoTreino(checkIn: CheckIn?, aoFazerCheckIn: (CheckIn) -> Unit) {
     }
 
     // Prepara o pedido de permissão e diz o que fazer com a resposta
+    // true quando o Android parou de perguntar ("Não perguntar de novo"):
+    // aí só dá para liberar pelas configurações do app
+    var bloqueado by rememberSaveable { mutableStateOf(false) }
+
     val pedirPermissao = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { permitiu ->
-        if (permitiu) buscar()
-        // Negado não é bug: avisa sem drama e o app segue normal
-        else aviso = "Sem problema: o treino funciona sem o check-in."
+        if (permitiu) {
+            bloqueado = false
+            buscar()
+        } else {
+            // Se o Android nem explicaria mais o pedido, é porque a janela não aparece mais
+            val activity = contexto as? Activity
+            bloqueado = activity != null && !ActivityCompat.shouldShowRequestPermissionRationale(
+                activity, Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+            // Negado não é bug: avisa sem drama e o app segue normal
+            aviso = if (bloqueado) "A localização está bloqueada para o app. Libere nas configurações."
+                    else "Sem problema: o treino funciona sem o check-in."
+        }
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(Espaco.pequeno)) {
@@ -162,6 +182,19 @@ fun CheckInDoTreino(checkIn: CheckIn?, aoFazerCheckIn: (CheckIn) -> Unit) {
         // O aviso aparece embaixo do botão
         aviso?.let {
             Text(it, style = MaterialTheme.typography.bodyMedium)
+        }
+
+        // Atalho para a tela de permissões do app (quando o Android parou de perguntar)
+        if (bloqueado) {
+            TextButton(onClick = {
+                val abrirConfig = Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", contexto.packageName, null)
+                )
+                contexto.startActivity(abrirConfig)
+            }) {
+                Text("Abrir configurações")
+            }
         }
     }
 }
